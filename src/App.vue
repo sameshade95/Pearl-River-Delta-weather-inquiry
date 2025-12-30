@@ -105,7 +105,7 @@ const weatherEmoji = computed(() => {
 
 function getWeather() {
   fetch(
-      `https://nd4bjaqnaq.re.qweatherapi.com/v7/weather/now?location=${cityId.value}&key=b1a2ead2e2a74b108e7a18eae7d08dd8`
+      `https://这里填API host/v7/weather/now?location=${cityId.value}&key=这里填API key`
   )
       .then(res => res.json())
       .then(data => {
