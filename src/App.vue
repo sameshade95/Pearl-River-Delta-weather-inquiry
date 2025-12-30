@@ -1,19 +1,21 @@
 <template>
   <div id="content">
-    <!-- 切换城市 -->
     <div id="location">
       <select v-model="cityId">
-        <option value="101010100">北京</option>
-        <option value="101020100">上海</option>
-        <option value="101030100">天津</option>
-        <option value="101040100">重庆</option>
+        <option value="101280101">廣州</option>
+        <option value="101280601">深圳</option>
+        <option value="101280701">珠海</option>
+        <option value="101280800">佛山</option>
+        <option value="101281601">東莞</option>
+        <option value="101281701">中山</option>
+        <option value="101320101">香港</option>
+        <option value="101330101">澳門</option>
       </select>
-
     </div>
 
-    <!-- 天气状况 -->
     <div id="weather">
-      <div style="font-size: 50px;"> {{ weatherEmoji }}
+      <div style="font-size: 64px; line-height: 1;">
+        {{ weatherEmoji }}
       </div>
       <div>
         <div>{{ weather.text }}</div>
@@ -21,7 +23,6 @@
       </div>
     </div>
 
-    <!-- 实况气象数据 -->
     <div id="now">
       <table>
         <tr>
@@ -50,41 +51,69 @@
 </template>
 
 <script setup>
-import { ref, watch, computed } from "vue"; // 增加 computed
+import { ref, watch, computed } from "vue";
 
 const cityId = ref("101010100");
 
 const weather = ref({
-  // ...保持原样
+  temp: "",
+  feelsLike: "",
+  text: "",
+  humidity: "",
+  precip: "",
+  pressure: "",
+  vis: "",
+  windScale: "",
   icon: "100"
 });
 
-// 建立 Icon 代码与 Emoji 的映射表 (根据和风天气代码)
-const emojiMap = {
-  "100": "☀️", // 晴
-  "101": "☁️", // 多云
-  "102": "⛅", // 少云
-  "103": "🌤️", // 晴间多云
-  "104": "☁️", // 阴
-  "300": "🌦️", // 阵雨
-  "305": "🌧️", // 小雨
-  "306": "🌧️", // 中雨
-  "307": "🌧️", // 大雨
-  "400": "🌨️", // 小雪
-  "150": "🌙", // 晴（夜）
-  // 可根据需要继续添加...
+// 天气代码转 Emoji 逻辑
+const getWeatherEmoji = (code) => {
+  const c = parseInt(code);
+
+  // 1. 特殊处理夜间图标 (和风天气夜间代码通常以 15x, 35x, 45x 等开头)
+  const nightIcons = {
+    "150": "🌙", // 晴（夜）
+    "151": "☁️", // 多云（夜）
+    "152": "☁️", // 少云（夜）
+    "153": "☁️", // 晴间多云（夜）
+    "350": "🌧️", // 阵雨（夜）
+    "351": "🌧️", // 强阵雨（夜）
+    "456": "🌨️", // 阵雪（夜）
+    "457": "🌨️", // 强阵雪（夜）
+  };
+
+  if (nightIcons[code]) {
+    return nightIcons[code];
+  }
+
+  // 2. 常规白天或通用图标逻辑
+  if (c === 100) return "☀️";            // 晴
+  if (c >= 101 && c <= 199) return "☁️";  // 云
+  if (c >= 300 && c <= 399) return "🌧️";  // 雨
+  if (c >= 400 && c <= 499) return "🌨️";  // 雪
+  if (c >= 500 && c <= 599) return "🌫️";  // 雾/霾
+  if (c >= 200 && c <= 299) return "💨";  // 风
+
+  return "🌡️";
 };
 
-// 计算属性：匹配 Emoji，若无匹配则显示默认云朵
+// 计算属性：根据当前 icon 实时计算 Emoji
 const weatherEmoji = computed(() => {
-  return emojiMap[weather.value.icon] || "☁️";
+  return getWeatherEmoji(weather.value.icon);
 });
 
 function getWeather() {
-  fetch(`https://nd4bjaqnaq.re.qweatherapi.com/v7/weather/now?location=${cityId.value}&key=b1a2ead2e2a74b108e7a18eae7d08dd8`)
+  fetch(
+      `https://nd4bjaqnaq.re.qweatherapi.com/v7/weather/now?location=${cityId.value}&key=b1a2ead2e2a74b108e7a18eae7d08dd8`
+  )
       .then(res => res.json())
       .then(data => {
-        if (data.code !== "200") return;
+        if (data.code !== "200") {
+          console.error("API 返回错误：", data);
+          return;
+        }
+
         const now = data.now;
         weather.value = {
           temp: now.temp,
@@ -95,18 +124,15 @@ function getWeather() {
           pressure: now.pressure,
           vis: now.vis,
           windScale: now.windScale,
-          icon: now.icon // 确保保存了 icon 编码
+          icon: now.icon
         };
-
       });
 }
 
-/* 关键：监听 cityId 的变化 */
 watch(cityId, () => {
   getWeather();
 });
 
-/* 页面首次加载 */
 getWeather();
-
 </script>
+
