@@ -13,8 +13,7 @@
 
     <!-- 天气状况 -->
     <div id="weather">
-      <div>
-        <img :src="iconUrl" alt="weather" />
+      <div style="font-size: 50px;"> {{ weatherEmoji }}
       </div>
       <div>
         <div>{{ weather.text }}</div>
@@ -51,35 +50,41 @@
 </template>
 
 <script setup>
-import { ref, watch } from "vue";
+import { ref, watch, computed } from "vue"; // 增加 computed
 
 const cityId = ref("101010100");
 
 const weather = ref({
-  temp: "",
-  feelsLike: "",
-  text: "",
-  humidity: "",
-  precip: "",
-  pressure: "",
-  vis: "",
-  windScale: "",
+  // ...保持原样
   icon: "100"
 });
 
-const iconUrl = ref("");
+// 建立 Icon 代码与 Emoji 的映射表 (根据和风天气代码)
+const emojiMap = {
+  "100": "☀️", // 晴
+  "101": "☁️", // 多云
+  "102": "⛅", // 少云
+  "103": "🌤️", // 晴间多云
+  "104": "☁️", // 阴
+  "300": "🌦️", // 阵雨
+  "305": "🌧️", // 小雨
+  "306": "🌧️", // 中雨
+  "307": "🌧️", // 大雨
+  "400": "🌨️", // 小雪
+  "150": "🌙", // 晴（夜）
+  // 可根据需要继续添加...
+};
+
+// 计算属性：匹配 Emoji，若无匹配则显示默认云朵
+const weatherEmoji = computed(() => {
+  return emojiMap[weather.value.icon] || "☁️";
+});
 
 function getWeather() {
-  fetch(
-      `https://nd4bjaqnaq.re.qweatherapi.com/v7/weather/now?location=${cityId.value}&key=b1a2ead2e2a74b108e7a18eae7d08dd8`
-  )
+  fetch(`https://nd4bjaqnaq.re.qweatherapi.com/v7/weather/now?location=${cityId.value}&key=b1a2ead2e2a74b108e7a18eae7d08dd8`)
       .then(res => res.json())
       .then(data => {
-        if (data.code !== "200") {
-          console.error("API 返回错误：", data);
-          return;
-        }
-
+        if (data.code !== "200") return;
         const now = data.now;
         weather.value = {
           temp: now.temp,
@@ -90,10 +95,9 @@ function getWeather() {
           pressure: now.pressure,
           vis: now.vis,
           windScale: now.windScale,
-          icon: now.icon
+          icon: now.icon // 确保保存了 icon 编码
         };
 
-        iconUrl.value = `https://cdn.qweather.com/weather/64/${now.icon}.png`;
       });
 }
 
