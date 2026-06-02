@@ -14,48 +14,54 @@
     </div>
 
     <div v-if="loading && !weather.temp" id="loading">
-      加载中…
+      <div class="loading-spinner"></div>
+      <div>加载中…</div>
     </div>
 
     <div v-else-if="error && !weather.temp" id="error">
-      {{ error }}
+      <div class="error-icon">⚠️</div>
+      <div class="error-message">{{ error }}</div>
       <button @click="getWeather">重试</button>
     </div>
 
     <template v-else>
       <div id="weather">
-        <div style="font-size: 64px; line-height: 1;">
-          {{ weatherEmoji }}
-        </div>
-        <div>
-          <div>{{ weather.text }}</div>
-          <div>{{ weather.temp }} ℃</div>
-        </div>
+        <div class="weather-icon">{{ weatherEmoji }}</div>
+        <div class="weather-temp">{{ weather.temp }}°C</div>
+        <div class="weather-text">{{ weather.text }}</div>
       </div>
 
-      <div id="now">
-        <table>
-          <tr>
-            <td>{{ weather.feelsLike }} ℃</td>
-            <td>{{ weather.humidity }} %</td>
-            <td>{{ weather.precip }} mm</td>
-          </tr>
-          <tr>
-            <td>体感温度</td>
-            <td>相对湿度</td>
-            <td>降水量</td>
-          </tr>
-          <tr>
-            <td>{{ weather.pressure }} hPa</td>
-            <td>{{ weather.vis }} km</td>
-            <td>{{ weather.windScale }} 级</td>
-          </tr>
-          <tr>
-            <td>气压</td>
-            <td>能见度</td>
-            <td>风力</td>
-          </tr>
-        </table>
+      <div id="details">
+        <div class="detail-card temp">
+          <div class="detail-icon">🌡️</div>
+          <div class="detail-value">{{ weather.feelsLike }}°</div>
+          <div class="detail-label">体感温度</div>
+        </div>
+        <div class="detail-card humid">
+          <div class="detail-icon">💧</div>
+          <div class="detail-value">{{ weather.humidity }}%</div>
+          <div class="detail-label">相对湿度</div>
+        </div>
+        <div class="detail-card precip">
+          <div class="detail-icon">🌧️</div>
+          <div class="detail-value">{{ weather.precip }} mm</div>
+          <div class="detail-label">降水量</div>
+        </div>
+        <div class="detail-card press">
+          <div class="detail-icon">📊</div>
+          <div class="detail-value">{{ weather.pressure }} hPa</div>
+          <div class="detail-label">气压</div>
+        </div>
+        <div class="detail-card vis">
+          <div class="detail-icon">👁️</div>
+          <div class="detail-value">{{ weather.vis }} km</div>
+          <div class="detail-label">能见度</div>
+        </div>
+        <div class="detail-card wind">
+          <div class="detail-icon">💨</div>
+          <div class="detail-value">{{ weather.windScale }} 级</div>
+          <div class="detail-label">风力</div>
+        </div>
       </div>
     </template>
 
